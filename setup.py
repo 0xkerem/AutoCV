@@ -26,7 +26,6 @@ setup(
     python_requires='>=3.9',
     install_requires=[
         "numpy",
-        "scipy",
         "scikit-learn",
     ],
     entry_points={
