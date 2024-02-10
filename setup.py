@@ -1,5 +1,5 @@
 from setuptools import setup, find_packages
-import AutoCV
+import autocv
 
 # Read the contents of the README file
 with open("README.md", "r") as fh:
@@ -7,9 +7,9 @@ with open("README.md", "r") as fh:
 
 setup(
     name="AutoCV",
-    version=AutoCV.__version__,
-    author=AutoCV.__author__,
-    author_email=AutoCV.__email__,
+    version=autocv.__version__,
+    author=autocv.__author__,
+    author_email=autocv.__email__,
     description="An automated cross-validation framework for machine learning models.",
     long_description=long_description,
     long_description_content_type="text/markdown",

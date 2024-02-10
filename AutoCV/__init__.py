@@ -7,10 +7,11 @@ __author__ = "Kerem"
 __email__ = "keremozrtk@gmail.com"
 
 from .core import AutoCV
+from .core import cross_validate
 
 __all__ = [
     "AutoCV",
-    "CrossValidator",
+    "cross_validate",
     "evaluate_performance",
     "BaseModel",
     "LinearModel",
