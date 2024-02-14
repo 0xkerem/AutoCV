@@ -68,56 +68,87 @@ class AutoCV:
     def _determine_n_splits(self):
         pass
 
-    def cross_validate(self, X, y, force=False):
-        """
-        Perform automatic cross-validation.
+def cross_validate(self, X, y, force=False):
+    """
+    Perform automatic cross-validation.
 
-        Parameters:
-        X: array-like, shape (n_samples, n_features), the input data
-        y: array-like, shape (n_samples,), the target variable
-        force: bool, optional (default=False), If True, forces cross-validation on large datasets.
+    Parameters:
+    X: array-like, shape (n_samples, n_features), the input data
+    y: array-like, shape (n_samples,), the target variable
+    force: bool, optional (default=False), If True, forces cross-validation on large datasets.
 
-        Returns:
-        dict: A dictionary containing the mean and standard deviation of the cross-validation scores.
-        """
-        size = X.shape[0]
+    Returns:
+    dict: A dictionary containing the mean and standard deviation of the cross-validation scores.
+    """
+    size = X.shape[0]
 
-        if size > 100000 and not force:
-            print("Dataset is large. Skipping cross-validation. Set `force=True` to override.")
-            return None
-        
-        problem_type = self._determine_problem_type(y)
+    # Check if the dataset is too large
+    if size > 100000 and not force:
+        print("Dataset is large. Skipping cross-validation. Set `force=True` to override.")
+        return None
 
-        if size <= 200:
-            cv_strategy = LeaveOneOut()
-        elif size <= 1000:
-            cv_strategy = LeavePOut(p=np.round(size/100))
-        elif problem_type == 'classification':
-            # Encode labels if they are not numeric
-            if y.dtype == 'O' or isinstance(y[0], str):
-                y = LabelEncoder().fit_transform(y)
-            
-            # Check if data is imbalanced
-            if self._is_imbalanced(y):
-                print("Data is imbalanced. Using Stratified K-Fold.")
-                if size < 20000:
-                    cv_strategy = StratifiedKFold(n_splits=self.cv)
-                else:
-                    cv_strategy = StratifiedShuffleSplit(n_splits=self.cv)
-        else:
+    problem_type = self._determine_problem_type(y)
+
+    # Determine the cross-validation strategy
+    cv_strategy = self._select_cv_strategy(size, problem_type, y)
+
+    # Use Group K-Fold if specified
+    if self.group_column is not None:
+        cv_strategy = GroupKFold(n_splits=self.cv)
+        groups = self.group_column
+    else:
+        groups = None
+
+    # Perform cross-validation
+    scores = sklearn_cv(self.model, X, y, cv=cv_strategy, scoring=self.scoring, groups=groups)
+    results = {
+        'mean_score': np.mean(scores),
+        'std_score': np.std(scores)
+    }
+    return results
+
+def _select_cv_strategy(self, size, problem_type, y):
+    """
+    Select the appropriate cross-validation strategy based on the dataset size and problem type.
+
+    Parameters:
+    size: int, the number of samples in the dataset
+    problem_type: str, the type of problem (e.g., 'classification' or 'regression')
+    y: array-like, shape (n_samples,), the target variable
+
+    Returns:
+    cv_strategy: cross-validation strategy object
+    """
+    if size <= 200:
+        return LeaveOneOut()
+    elif size <= 1000:
+        return LeavePOut(p=np.round(size / 100))
+    elif problem_type == 'classification':
+        y = self._encode_labels_if_needed(y)
+        if self._is_imbalanced(y):
+            print("Data is imbalanced. Using Stratified K-Fold.")
             if size < 20000:
-                cv_strategy = KFold(n_splits=self.cv)
+                return StratifiedKFold(n_splits=self.cv)
             else:
-                cv_strategy = ShuffleSplit(n_splits=self.cv)
+                return StratifiedShuffleSplit(n_splits=self.cv)
+        else:
+            return KFold(n_splits=self.cv)
+    else:
+        if size < 20000:
+            return KFold(n_splits=self.cv)
+        else:
+            return ShuffleSplit(n_splits=self.cv)
 
-        # Use Group K-Fold if specified
-        if self.group_column is not None:
-            cv_strategy = GroupKFold(n_splits=self.cv)
-            groups = self.group_column
+def _encode_labels_if_needed(self, y):
+    """
+    Encode labels if they are not numeric.
 
-        scores = sklearn_cv(self.model, X, y, cv=cv_strategy, scoring=self.scoring, groups=groups)
-        results = {
-            'mean_score': np.mean(scores),
-            'std_score': np.std(scores)
-        }
-        return results
+    Parameters:
+    y: array-like, shape (n_samples,), the target variable
+
+    Returns:
+    y: array-like, shape (n_samples,), the encoded target variable
+    """
+    if y.dtype == 'O' or isinstance(y[0], str):
+        return LabelEncoder().fit_transform(y)
+    return y
