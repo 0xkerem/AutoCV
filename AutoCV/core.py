@@ -16,6 +16,10 @@ from sklearn.model_selection import (
 from sklearn.utils.multiclass import type_of_target
 from sklearn.preprocessing import LabelEncoder
 
+
+LARGE_LIMIT = 20000
+
+
 class AutoCV:
     def __init__(self, model, cv=None, scoring=None, group_column=None):
         """
@@ -32,6 +36,8 @@ class AutoCV:
         self.cv = cv
         self.scoring = scoring
         self.group_column = group_column
+        self.estimator_type = None
+
 
     def _determine_problem_type(self, y):
         """
@@ -51,6 +57,7 @@ class AutoCV:
         else:
             raise ValueError("Unsupported target type: {}".format(target_type))
 
+
     def _is_imbalanced(self, y):
         """
         Check if the classification data is imbalanced.
@@ -65,8 +72,28 @@ class AutoCV:
         minority_class_ratio = np.min(class_counts) / np.sum(class_counts)
         return minority_class_ratio < 0.3
     
-    def _determine_n_splits(self):
-        pass
+
+    def _determine_n_splits(self, size: int):
+        """
+        Determine the number of cross-validation splits based on the dataset size.
+
+        Parameters:
+        size: int, the number of samples in the dataset
+
+        Raises:
+        ValueError: If the number of splits is greater than the number of data points.
+        """
+        if self.cv is None:
+            # Set default number of splits based on dataset size and estimator type
+            if size <= 2500 or size > LARGE_LIMIT:
+                self.cv = 10
+            elif size > 10000 and self.estimator_type == 'nn':
+                self.cv = 3
+            else:
+                self.cv = 5
+        elif self.cv > size:
+            raise ValueError(f"Number of splits (cv={self.cv}) cannot be more than the number of data points (n={size}).")
+
 
     def cross_validate(self, X, y, force=False):
         """
@@ -86,6 +113,10 @@ class AutoCV:
         if size > 100000 and not force:
             print("Dataset is large. Skipping cross-validation. Set `force=True` to override.")
             return None
+
+        # TODO: Check estimator type
+
+        self._determine_n_splits(size)
 
         problem_type = self._determine_problem_type(y)
 
@@ -107,6 +138,7 @@ class AutoCV:
         }
         return results
 
+
     def _select_cv_strategy(self, size, problem_type, y):
         """
         Select the appropriate cross-validation strategy based on the dataset size and problem type.
@@ -126,18 +158,21 @@ class AutoCV:
         elif problem_type == 'classification':
             y = self._encode_labels_if_needed(y)
             if self._is_imbalanced(y):
-                print("Data is imbalanced. Using Stratified K-Fold.")
-                if size < 20000:
+                if size < LARGE_LIMIT:
                     return StratifiedKFold(n_splits=self.cv)
                 else:
                     return StratifiedShuffleSplit(n_splits=self.cv)
             else:
-                return KFold(n_splits=self.cv)
+                if size < LARGE_LIMIT:
+                    return KFold(n_splits=self.cv)
+                else:
+                    return ShuffleSplit(n_splits=self.cv)
         else:
-            if size < 20000:
+            if size < LARGE_LIMIT:
                 return KFold(n_splits=self.cv)
             else:
                 return ShuffleSplit(n_splits=self.cv)
+
 
     def _encode_labels_if_needed(self, y):
         """
