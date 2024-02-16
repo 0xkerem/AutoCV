@@ -3,6 +3,32 @@ Utility functions for the AutoCV.
 """
 
 from sklearn.base import BaseEstimator
+from sklearn.utils.multiclass import type_of_target
+
+def determine_problem_type(target, detailed=False):
+    """
+    Determine if the problem is a classification or regression problem.
+
+    Parameters:
+    target: array-like, shape (n_samples,), the target variable.
+    detailed: bool, optional (default=False). If True, return specific classification type.
+
+    Returns:
+    str: One of 'classification', 'binary_classification', 'multiclass_classification', or 'regression'.
+    """
+    target_type = type_of_target(target)
+    
+    if target_type == 'binary':
+        return 'binary_classification' if detailed else 'classification'
+    elif target_type == 'multiclass':
+        return 'multiclass_classification' if detailed else 'classification'
+    elif target_type in ['continuous', 'continuous-multioutput']:
+        return 'regression'
+    elif target_type in ['multilabel-indicator', 'multiclass-multioutput']: # TODO: Handle this types
+        raise ValueError("Unsupported target type: {}".format(target_type))
+    else:
+        raise ValueError("Unsupported or unrecognized target type: {}".format(target_type))
+
 
 def is_sklearn_model(model):
     """

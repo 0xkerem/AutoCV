@@ -13,10 +13,10 @@ from sklearn.model_selection import (
     ShuffleSplit,
     StratifiedShuffleSplit
 )
-from sklearn.utils.multiclass import type_of_target
 from sklearn.preprocessing import LabelEncoder
 from utils import (
-    check_estimator_type
+    check_estimator_type,
+    determine_problem_type
 )
 
 
@@ -40,25 +40,6 @@ class AutoCV:
         self.scoring = scoring
         self.group_column = group_column
         self.estimator_type = None
-
-
-    def _determine_problem_type(self, y):
-        """
-        Determine if the problem is a classification or regression problem.
-
-        Parameters:
-        y: array-like, shape (n_samples,), the target variable
-
-        Returns:
-        str: 'classification' or 'regression'
-        """
-        target_type = type_of_target(y)
-        if target_type in ['binary', 'multiclass']:
-            return 'classification'
-        elif target_type in ['continuous', 'continuous-multioutput']:
-            return 'regression'
-        else:
-            raise ValueError("Unsupported target type: {}".format(target_type))
 
 
     def _is_imbalanced(self, y):
@@ -121,7 +102,8 @@ class AutoCV:
 
         self._determine_n_splits(size)
 
-        problem_type = self._determine_problem_type(y)
+        # Determine the type of the estimator
+        problem_type = self.determine_problem_type(y)
 
         # Determine the cross-validation strategy
         cv_strategy = self._select_cv_strategy(size, problem_type, y)
