@@ -18,6 +18,7 @@ from utils import (
     check_estimator_type,
     determine_problem_type
 )
+from metrics import set_default_scoring
 
 
 LARGE_LIMIT = 20000
@@ -103,7 +104,7 @@ class AutoCV:
         self._determine_n_splits(size)
 
         # Determine the type of the estimator
-        problem_type = self.determine_problem_type(y)
+        problem_type = determine_problem_type(y)
 
         # Determine the cross-validation strategy
         cv_strategy = self._select_cv_strategy(size, problem_type, y)
@@ -115,7 +116,10 @@ class AutoCV:
         else:
             groups = None
 
-        # TODO: Set default scores if it is not specified
+        # Use default scoring if is is not set manually
+        if self.scoring is None:
+            self.scoring = set_default_scoring(y)
+
         # Perform cross-validation
         scores = sklearn_cv(self.model, X, y, cv=cv_strategy, scoring=self.scoring, groups=groups)
         results = {

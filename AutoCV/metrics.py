@@ -36,3 +36,25 @@ regression_scorers = {
     'mae': make_scorer(mean_absolute_error),
     'r2': make_scorer(r2_score)
 }
+
+
+def set_default_scoring(target):
+    """
+    Set default scoring metrics based on the type of problem.
+
+    Parameters:
+    target: array-like, shape (n_samples,), the target variable.
+
+    Returns:
+    dict: A dictionary of scoring functions appropriate for the problem type.
+    """
+    problem_type = determine_problem_type(target, detailed=True)
+
+    if problem_type == 'binary_classification':
+        return binary_classification_scorers
+    elif problem_type == 'multiclass_classification':
+        return multi_class_classification_scorers
+    elif problem_type == 'regression':
+        return regression_scorers
+    else:
+        raise ValueError(f"Unsupported problem type: {problem_type}")
