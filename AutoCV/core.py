@@ -130,12 +130,14 @@ class AutoCV:
         else:
             groups = None
 
+        # TODO: Set default scores if it is not specified
         # Perform cross-validation
         scores = sklearn_cv(self.model, X, y, cv=cv_strategy, scoring=self.scoring, groups=groups)
         results = {
             'mean_score': np.mean(scores),
             'std_score': np.std(scores)
         }
+        # TODO: Return direct to average score but create new datatype to save other informations
         return results
 
 
@@ -187,3 +189,5 @@ class AutoCV:
         if y.dtype == 'O' or isinstance(y[0], str):
             return LabelEncoder().fit_transform(y)
         return y
+
+    # TODO: Create summary method
