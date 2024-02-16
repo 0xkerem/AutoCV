@@ -15,6 +15,9 @@ from sklearn.model_selection import (
 )
 from sklearn.utils.multiclass import type_of_target
 from sklearn.preprocessing import LabelEncoder
+from utils import (
+    check_estimator_type
+)
 
 
 LARGE_LIMIT = 20000
@@ -114,7 +117,7 @@ class AutoCV:
             print("Dataset is large. Skipping cross-validation. Set `force=True` to override.")
             return None
 
-        # TODO: Check estimator type
+        self.estimator_type = check_estimator_type(self.model)
 
         self._determine_n_splits(size)
 
