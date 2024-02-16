@@ -1,5 +1,5 @@
 """
-Unit tests for the AutoCV framework.
+Unit tests for the AutoCV.
 """
 
 import pytest
