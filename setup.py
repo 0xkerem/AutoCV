@@ -1,15 +1,18 @@
 from setuptools import setup, find_packages
-import autocv
 
 # Read the contents of the README file
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
+version = "0.2.5"
+author = "Kerem"
+author_email = "keremozrtk@gmail.com"
+
 setup(
     name="AutoCV",
-    version=autocv.__version__,
-    author=autocv.__author__,
-    author_email=autocv.__email__,
+    version=version,
+    author=author,
+    author_email=author_email,
     description="An automated cross-validation framework for machine learning models.",
     long_description=long_description,
     long_description_content_type="text/markdown",
