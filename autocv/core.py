@@ -14,11 +14,11 @@ from sklearn.model_selection import (
     StratifiedShuffleSplit
 )
 from sklearn.preprocessing import LabelEncoder
-from utils import (
+from .utils import (
     check_estimator_type,
     determine_problem_type
 )
-from metrics import set_default_scoring
+from .metrics import set_default_scoring
 
 
 LARGE_LIMIT = 20000
@@ -122,10 +122,7 @@ class AutoCV:
 
         # Perform cross-validation
         scores = sklearn_cv(self.model, X, y, cv=cv_strategy, scoring=self.scoring, groups=groups)
-        results = {
-            'mean_score': np.mean(scores),
-            'std_score': np.std(scores)
-        }
+        results = scores
         # TODO: Return direct to average score but create new datatype to save other informations
         return results
 
@@ -142,10 +139,10 @@ class AutoCV:
         Returns:
         cv_strategy: cross-validation strategy object
         """
-        if size <= 200:
-            return LeaveOneOut()
+        if size <= 150:
+            return LeavePOut(p=2)
         elif size <= 1000:
-            return LeavePOut(p=np.round(size / 100))
+            return LeaveOneOut()
         elif problem_type == 'classification':
             y = self._encode_labels_if_needed(y)
             if self._is_imbalanced(y):

@@ -1,8 +1,8 @@
 """
-Deafult metrics for AutoCV.
+Default metrics for AutoCV.
 """
 
-from utils import determine_problem_type
+from .utils import determine_problem_type
 from sklearn.metrics import (
     make_scorer,
     accuracy_score,
@@ -17,17 +17,17 @@ from sklearn.metrics import (
 # Define default scorers for binary classification
 binary_classification_scorers = {
     'accuracy': make_scorer(accuracy_score),
-    'precision': make_scorer(precision_score, average='binary'),
-    'recall': make_scorer(recall_score, average='binary'),
-    'f1_score': make_scorer(f1_score, average='binary')
+    'precision': make_scorer(precision_score, average='binary', zero_division=1),
+    'recall': make_scorer(recall_score, average='binary', zero_division=1),
+    'f1_score': make_scorer(f1_score, average='binary', zero_division=1)
 }
 
 # Define default scorers for multi-class classification
 multi_class_classification_scorers = {
     'accuracy': make_scorer(accuracy_score),
-    'precision': make_scorer(precision_score, average='macro'),
-    'recall': make_scorer(recall_score, average='macro'),
-    'f1_score': make_scorer(f1_score, average='macro')
+    'precision': make_scorer(precision_score, average='macro', zero_division=1),
+    'recall': make_scorer(recall_score, average='macro', zero_division=1),
+    'f1_score': make_scorer(f1_score, average='macro', zero_division=1)
 }
 
 # Define default scorers for regression
