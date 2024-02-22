@@ -16,7 +16,8 @@ from sklearn.model_selection import (
 from sklearn.preprocessing import LabelEncoder
 from .utils import (
     check_estimator_type,
-    determine_problem_type
+    determine_problem_type,
+    Result
 )
 from .metrics import set_default_scoring
 
@@ -41,6 +42,7 @@ class AutoCV:
         self.scoring = scoring
         self.group_column = group_column
         self.estimator_type = None
+        self.result = None
 
 
     def _is_imbalanced(self, y):
@@ -121,10 +123,21 @@ class AutoCV:
             self.scoring = set_default_scoring(y)
 
         # Perform cross-validation
-        scores = sklearn_cv(self.model, X, y, cv=cv_strategy, scoring=self.scoring, groups=groups)
-        results = scores
-        # TODO: Return direct to average score but create new datatype to save other informations
-        return results
+        results = sklearn_cv(self.model, X, y, cv=cv_strategy, scoring=self.scoring, groups=groups)
+        
+        fit_time = results.pop('fit_time')
+        score_time = results.pop('score_time')
+        scores = results
+
+        Result(
+            fit_time=fit_time,
+            score_time=score_time,
+            average_fit_time=np.mean(fit_time),
+            average_score_time=np.mean(score_time),
+            scores=scores
+        )
+
+        return scores
 
 
     def _select_cv_strategy(self, size, problem_type, y):

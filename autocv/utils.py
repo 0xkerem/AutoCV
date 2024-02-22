@@ -4,6 +4,10 @@ Utility functions for the AutoCV.
 
 from sklearn.base import BaseEstimator
 from sklearn.utils.multiclass import type_of_target
+from dataclasses import dataclass, field
+from typing import Any, Dict
+import numpy as np
+
 
 def determine_problem_type(target, detailed=False):
     """
@@ -40,6 +44,7 @@ def is_sklearn_model(model):
     except ImportError:
         return False
 
+
 def is_torch_model(model):
     """
     Check if the model is a PyTorch model.
@@ -50,6 +55,7 @@ def is_torch_model(model):
     except ImportError:
         return False
 
+
 def is_tf_model(model):
     """
     Check if the model is a TensorFlow model.
@@ -59,6 +65,7 @@ def is_tf_model(model):
         return isinstance(model, tf.Module) or isinstance(model, tf.keras.Model) or hasattr(model, 'fit')
     except ImportError:
         return False
+
 
 def check_estimator_type(estimator):
     """
@@ -71,3 +78,12 @@ def check_estimator_type(estimator):
         return 'ml'
     else:
         raise TypeError("The type of the estimator cannot be determined!")
+
+
+@dataclass
+class Result:
+    fit_time: Any = field(default_factory=lambda: np.array([]))
+    score_time: Any = field(default_factory=lambda: np.array([]))
+    average_fit_time: float
+    average_score_time: float
+    scores: Dict[str, np.ndarray] = field(default_factory=dict)
