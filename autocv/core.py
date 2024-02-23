@@ -137,7 +137,7 @@ class AutoCV:
             scores=scores
         )
 
-        return scores
+        return np.mean(next(iter(scores.values())))
 
 
     def _select_cv_strategy(self, size, problem_type, y):
