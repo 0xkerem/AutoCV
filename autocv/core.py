@@ -3,6 +3,9 @@ Core module for the AutoCV.
 """
 
 import numpy as np
+from .metrics import set_default_scoring
+from sklearn.preprocessing import LabelEncoder
+
 from sklearn.model_selection import (
     cross_validate as sklearn_cv,
     StratifiedKFold,
@@ -13,13 +16,12 @@ from sklearn.model_selection import (
     ShuffleSplit,
     StratifiedShuffleSplit
 )
-from sklearn.preprocessing import LabelEncoder
+
 from .utils import (
     check_estimator_type,
     determine_problem_type,
     Result
 )
-from .metrics import set_default_scoring
 
 
 LARGE_LIMIT = 20000
@@ -87,12 +89,16 @@ class AutoCV:
         Perform automatic cross-validation.
 
         Parameters:
-        X: array-like, shape (n_samples, n_features), the input data
-        y: array-like, shape (n_samples,), the target variable
-        force: bool, optional (default=False), If True, forces cross-validation on large datasets.
+        X: array-like, shape (n_samples, n_features)
+            The input data.
+        y: array-like, shape (n_samples,)
+            The target variable.
+        force: bool, optional (default=False)
+            If True, forces cross-validation on large datasets.
 
         Returns:
-        dict: A dictionary containing the mean and standard deviation of the cross-validation scores.
+        float
+            The mean of the cross-validation scores.
         """
         size = X.shape[0]
 
@@ -118,7 +124,7 @@ class AutoCV:
         else:
             groups = None
 
-        # Use default scoring if is is not set manually
+        # Use default scoring if it is not set manually
         if self.scoring is None:
             self.scoring = set_default_scoring(y)
 
@@ -129,7 +135,7 @@ class AutoCV:
         score_time = results.pop('score_time')
         scores = results
 
-        Result(
+        self.result = Result(
             fit_time=fit_time,
             score_time=score_time,
             average_fit_time=np.mean(fit_time),
@@ -137,7 +143,7 @@ class AutoCV:
             scores=scores
         )
 
-        return np.mean(next(iter(scores.values())))
+        return np.mean(next(iter(scores.values()))) # TODO: Return dictionary of mean scores
 
 
     def _select_cv_strategy(self, size, problem_type, y):
