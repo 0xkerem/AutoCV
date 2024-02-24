@@ -24,9 +24,6 @@ from .utils import (
 )
 
 
-LARGE_LIMIT = 20000
-
-
 class AutoCV:
     def __init__(self, model, cv=None, scoring=None, group_column=None):
         """
@@ -45,6 +42,15 @@ class AutoCV:
         self.group_column = group_column
         self.estimator_type = None
         self.result = None
+        self.__large_limit = 20000
+
+    @property
+    def large_limit(self):
+        return self.__large_limit
+
+    @large_limit.setter
+    def large_limit(self, value):
+        self.__large_limit = value
 
 
     def _is_imbalanced(self, y):
@@ -74,7 +80,7 @@ class AutoCV:
         """
         if self.cv is None:
             # Set default number of splits based on dataset size and estimator type
-            if size <= 2500 or size > LARGE_LIMIT:
+            if size <= 2500 or size > self.__large_limit:
                 self.cv = 10
             elif size > 10000 and self.estimator_type == 'nn':
                 self.cv = 3
@@ -165,17 +171,17 @@ class AutoCV:
         elif problem_type == 'classification':
             y = self._encode_labels_if_needed(y)
             if self._is_imbalanced(y):
-                if size < LARGE_LIMIT:
+                if size < self.__large_limit:
                     return StratifiedKFold(n_splits=self.cv)
                 else:
                     return StratifiedShuffleSplit(n_splits=self.cv)
             else:
-                if size < LARGE_LIMIT:
+                if size < self.__large_limit:
                     return KFold(n_splits=self.cv)
                 else:
                     return ShuffleSplit(n_splits=self.cv)
         else:
-            if size < LARGE_LIMIT:
+            if size < self.__large_limit:
                 return KFold(n_splits=self.cv)
             else:
                 return ShuffleSplit(n_splits=self.cv)
