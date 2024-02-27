@@ -82,8 +82,9 @@ def check_estimator_type(estimator):
 
 @dataclass
 class Result:
-    average_fit_time: float
-    average_score_time: float
+    average_fit_time: np.float64
+    average_score_time: np.float64
     fit_time: Any = field(default_factory=lambda: np.array([]))
     score_time: Any = field(default_factory=lambda: np.array([]))
     scores: Dict[str, np.ndarray] = field(default_factory=dict)
+    average_scores: Dict[str, np.float64] = field(default_factory=dict)

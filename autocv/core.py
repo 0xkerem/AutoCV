@@ -140,16 +140,18 @@ class AutoCV:
         fit_time = results.pop('fit_time')
         score_time = results.pop('score_time')
         scores = results
+        average_scores = np.mean(np.array(scores), axis=1)
 
         self.result = Result(
             fit_time=fit_time,
             score_time=score_time,
             average_fit_time=np.mean(fit_time),
             average_score_time=np.mean(score_time),
-            scores=scores
+            scores=scores,
+            average_scores=average_scores
         )
 
-        return np.mean(next(iter(scores.values()))) # TODO: Return dictionary of mean scores
+        return average_scores
 
 
     def _select_cv_strategy(self, size, problem_type, y):
