@@ -140,7 +140,7 @@ class AutoCV:
         fit_time = results.pop('fit_time')
         score_time = results.pop('score_time')
         scores = results
-        average_scores = np.mean(np.array(scores), axis=1)
+        average_scores = None
 
         self.result = Result(
             fit_time=fit_time,
@@ -151,7 +151,7 @@ class AutoCV:
             average_scores=average_scores
         )
 
-        return average_scores
+        return scores
 
 
     def _select_cv_strategy(self, size, problem_type, y):
