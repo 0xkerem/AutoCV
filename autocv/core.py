@@ -42,6 +42,7 @@ class AutoCV:
         self.group_column = group_column
         self.estimator_type = None
         self.result = None
+        self.cv_strategy = None
         self.__large_limit = 20000
 
     @property
@@ -130,18 +131,27 @@ class AutoCV:
         else:
             groups = None
 
+        # Set cv_strategy attribute
+        self.cv_strategy = cv_strategy
+
         # Use default scoring if it is not set manually
         if self.scoring is None:
             self.scoring = set_default_scoring(y)
 
         # Perform cross-validation
         results = sklearn_cv(self.model, X, y, cv=cv_strategy, scoring=self.scoring, groups=groups)
-        
+                
+        # Separate the fit_time and score_time from the results
         fit_time = results.pop('fit_time')
         score_time = results.pop('score_time')
-        scores = results
-        average_scores = None
 
+        # The remaining items in results are the scores
+        scores = results
+
+        # Calculate the average scores
+        average_scores = {f'average_{key}': np.mean(value) for key, value in scores.items()}
+
+        # Create the Result object
         self.result = Result(
             fit_time=fit_time,
             score_time=score_time,
@@ -151,7 +161,8 @@ class AutoCV:
             average_scores=average_scores
         )
 
-        return scores
+        # Return the average scores
+        return average_scores
 
 
     def _select_cv_strategy(self, size, problem_type, y):
