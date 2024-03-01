@@ -45,6 +45,9 @@ class AutoCV:
         self.cv_strategy = None
         self.__large_limit = 20000
 
+        # TODO: Make user able to choose cv_strategy if it is not selected use autocv mechansim
+        # TODO: Make user able to select desired scorings with simple strings.
+
     @property
     def large_limit(self):
         return self.__large_limit
