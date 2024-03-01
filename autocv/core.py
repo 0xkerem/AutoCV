@@ -214,4 +214,21 @@ class AutoCV:
             return LabelEncoder().fit_transform(y)
         return y
 
-    # TODO: Create summary method
+    def summary(self):
+        """
+        Print a summary of the cross-validation results.
+        """
+        if self.result is None:
+            print("No results available. Please run cross-validation first.")
+            return
+
+        print("Cross-Validation Summary:")
+        print("-------------------------")
+        print(f"Model: {self.model}")
+        print(f"Cross-Validation Strategy: {self.cv_strategy}")
+        print(f"Scoring: {self.scoring}")
+        print(f"Fit Time: {self.result.average_fit_time:.4f} seconds")
+        print(f"Score Time: {self.result.average_score_time:.4f} seconds")
+        print("Scores:")
+        for key, value in self.result.average_scores.items():
+            print(f"  {key}: {value:.4f}")
