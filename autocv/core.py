@@ -214,7 +214,7 @@ class AutoCV:
             return LabelEncoder().fit_transform(y)
         return y
 
-    def summary(self):
+    def summary(self): # TODO: Show min max accuracy for each scoring and make sumary more appealing
         """
         Print a summary of the cross-validation results.
         """
@@ -226,9 +226,10 @@ class AutoCV:
         print("-------------------------")
         print(f"Model: {self.model}")
         print(f"Cross-Validation Strategy: {self.cv_strategy}")
-        print(f"Scoring: {self.scoring}")
-        print(f"Fit Time: {self.result.average_fit_time:.4f} seconds")
-        print(f"Score Time: {self.result.average_score_time:.4f} seconds")
+        print(f"Average Fit Time: {self.result.average_fit_time:.4f} seconds")
+        print(f"Average Score Time: {self.result.average_score_time:.4f} seconds")
         print("Scores:")
         for key, value in self.result.average_scores.items():
             print(f"  {key}: {value:.4f}")
+
+    # TODO: Consider implementing __repr__ or __str__ methods for better object representation and easier debugging.
