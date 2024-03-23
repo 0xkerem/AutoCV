@@ -11,6 +11,7 @@ from sklearn.model_selection import (
     StratifiedKFold,
     KFold,
     GroupKFold,
+    StratifiedGroupKFold,
     LeaveOneOut,
     LeavePOut,
     ShuffleSplit,
@@ -127,13 +128,16 @@ class AutoCV:
         # Determine the cross-validation strategy
         cv_strategy = self._select_cv_strategy(size, problem_type, y)
 
-        # Use Group K-Fold if specified
+        # Use Group CV strategy if specified
         if self.group_column is not None:
-            cv_strategy = GroupKFold(n_splits=self.cv)
             groups = self.group_column
+            if problem_type == 'classification' and self._is_imbalanced(y):
+                cv_strategy = StratifiedGroupKFold(n_splits=self.cv)
+            else:
+                cv_strategy = GroupKFold(n_splits=self.cv)
         else:
             groups = None
-
+            
         # Set cv_strategy attribute
         self.cv_strategy = cv_strategy
 
