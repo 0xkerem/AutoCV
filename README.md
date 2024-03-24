@@ -9,6 +9,10 @@ AutoCV is an automated cross-validation framework designed to simplify and strea
 - **Default Performance Metrics**: Provides built-in performance metrics for evaluating models.
 - **Extensible Framework**: Easily extendable with custom metrics and validation techniques.
 
+<div style="text-align: center;">
+  <img src="https://i.ibb.co/2qxCG23/cv.gif" alt="K-Fold Cross Validation source: 0xkerem" style="border: 2px solid black; border-radius: 10px;">
+</div>
+
 ## Installation
 
 To install AutoCV, clone the repository and run the setup script:
