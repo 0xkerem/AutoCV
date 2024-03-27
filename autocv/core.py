@@ -26,13 +26,13 @@ from .utils import (
 
 
 class AutoCV:
-    def __init__(self, model, cv=None, scoring=None, group_column=None, random_state=None):
+    def __init__(self, model, n_splits=None, scoring=None, group_column=None, random_state=None):
         """
         Initializes the AutoCV object.
 
         Parameters:
         model: A machine learning model instance (e.g., from scikit-learn)
-        cv: int, cross-validation splitting strategy (default is None)
+        n_splits: int, cross-validation splitting strategy (default is None)
         scoring: str or callable, a scoring method to evaluate the performance (default is None)
         group_column: array-like, group labels for Group K-Fold cross-validation (default is None)
         random_state: int or RandomState instance, controls the randomness of the estimator (default is None)
@@ -44,7 +44,7 @@ class AutoCV:
         __large_limit: Internal parameter to manage computational complexity thresholds
         """
         self.model = model
-        self.cv = cv
+        self.n_splits = n_splits
         self.scoring = scoring
         self.group_column = group_column
         self.random_state = random_state
@@ -90,16 +90,16 @@ class AutoCV:
         Raises:
         ValueError: If the number of splits is greater than the number of data points.
         """
-        if self.cv is None:
+        if self.n_splits is None:
             # Set default number of splits based on dataset size and estimator type
             if size <= 2500 or size > self.__large_limit:
-                self.cv = 10
+                self.n_splits = 10
             elif size > 10000 and self.estimator_type == 'nn':
-                self.cv = 3
+                self.n_splits = 3
             else:
-                self.cv = 5
-        elif self.cv > size:
-            raise ValueError(f"Number of splits (cv={self.cv}) cannot be more than the number of data points (n={size}).")
+                self.n_splits = 5
+        elif self.n_splits > size:
+            raise ValueError(f"Number of splits (cv={self.n_splits}) cannot be more than the number of data points (n={size}).")
 
 
     def cross_validate(self, X, y, force=False, n_jobs=None):
@@ -142,9 +142,9 @@ class AutoCV:
         if self.group_column is not None:
             groups = self.group_column
             if problem_type == 'classification' and self._is_imbalanced(y):
-                cv_strategy = StratifiedGroupKFold(n_splits=self.cv, random_state=self.random_state)
+                cv_strategy = StratifiedGroupKFold(n_splits=self.n_splits, random_state=self.random_state)
             else:
-                cv_strategy = GroupKFold(n_splits=self.cv)
+                cv_strategy = GroupKFold(n_splits=self.n_splits)
         else:
             groups = None
 
@@ -202,19 +202,19 @@ class AutoCV:
             y = self._encode_labels_if_needed(y)
             if self._is_imbalanced(y):
                 if size < self.__large_limit:
-                    return StratifiedKFold(n_splits=self.cv, random_state=self.random_state)
+                    return StratifiedKFold(n_splits=self.n_splits, random_state=self.random_state)
                 else:
-                    return StratifiedShuffleSplit(n_splits=self.cv, random_state=self.random_state)
+                    return StratifiedShuffleSplit(n_splits=self.n_splits, random_state=self.random_state)
             else:
                 if size < self.__large_limit:
-                    return KFold(n_splits=self.cv)
+                    return KFold(n_splits=self.n_splits)
                 else:
-                    return ShuffleSplit(n_splits=self.cv)
+                    return ShuffleSplit(n_splits=self.n_splits)
         else:
             if size < self.__large_limit:
-                return KFold(n_splits=self.cv)
+                return KFold(n_splits=self.n_splits)
             else:
-                return ShuffleSplit(n_splits=self.cv)
+                return ShuffleSplit(n_splits=self.n_splits)
 
 
     def _encode_labels_if_needed(self, y):
