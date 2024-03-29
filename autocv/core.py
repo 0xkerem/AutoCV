@@ -249,4 +249,11 @@ class AutoCV:
         for key, value in self.result.average_scores.items():
             print(f"  {key}: {value:.4f}")
 
-    # TODO: Consider implementing __repr__ or __str__ methods for better object representation and easier debugging.
+    def __repr__(self) -> str:
+        model_name = self.model.__class__.__name__
+        n_splits_info = f"n_splits={self.n_splits}" if self.n_splits is not None else "n_splits=auto"
+        scoring_info = f"scoring={self.scoring}" if self.scoring is not None else "scoring=default"
+        group_info = f"group_column={bool(self.group_column)}" if self.group_column is not None else "group_column=None"
+        cv_strategy_name = self.cv_strategy.__class__.__name__ if self.cv_strategy else "cv_strategy=auto"
+        
+        return f"AutoCV(model={model_name}, {n_splits_info}, {scoring_info}, {group_info}, cv_strategy={cv_strategy_name})"
