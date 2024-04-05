@@ -56,5 +56,3 @@ def set_default_scoring(target):
         return multi_class_classification_scorers
     elif problem_type == 'regression':
         return regression_scorers
-    else:
-        raise ValueError(f"Unsupported problem type: {problem_type}")
